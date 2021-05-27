@@ -36,13 +36,13 @@ def split(deck,hands,hand,index,bets,bet):
     #print(hands)
     #print(bets)
 
-def action(hand, dealerupcard, deck,bet,index,hands,bets):
+def action(hand, dealerupcard, deck,bet,index,hands,bets,splitted):
     #print()
     #print("processing hand",index,hand)
-    if hand[0] == hand[1]:
+    if hand[0] == hand[1] and splitted==0:
         if hand[0]==1 or hand[0]==8:
             split(deck,hands,hand,index,bets,bet)
-            action(hands[index],dealerupcard,deck,bet,index,hands,bets)
+            action(hands[index],dealerupcard,deck,bet,index,hands,bets,1)
         elif hand[0]==10 or hand[0] == 5:
             hardaction(hand, dealerupcard, deck,bet)
         elif hand[0]==9:
@@ -50,23 +50,23 @@ def action(hand, dealerupcard, deck,bet,index,hands,bets):
                 hardaction(hand,dealerupcard,deck,bet)
             else:
                 split(deck,hands,hand,index,bets,bet)
-                action(hands[index],dealerupcard,deck,bet,index,hands,bets)
+                action(hands[index],dealerupcard,deck,bet,index,hands,bets,1)
         elif hand[0]==6:
             if dealerupcard >=2 and dealerupcard < 7:
                 split(deck,hands,hand,index,bets,bet)
-                action(hands[index],dealerupcard,deck,bet,index,hands,bets)
+                action(hands[index],dealerupcard,deck,bet,index,hands,bets,1)
             else:
                 hardaction(hand,dealerupcard,deck,bet)
         elif hand[0]==4:
             if dealerupcard ==5 or dealerupcard ==6:
                 split(deck,hands,hand,index,bets,bet)
-                action(hands[index],dealerupcard,deck,bet,index,hands,bets)
+                action(hands[index],dealerupcard,deck,bet,index,hands,bets,1)
             else:
                 hardaction(hand,dealerupcard,deck,bet)
         else:
             if dealerupcard >=2 and dealerupcard < 8:
                 split(deck,hands,hand,index,bets,bet)
-                action(hands[index],dealerupcard,deck,bet,index,hands,bets)
+                action(hands[index],dealerupcard,deck,bet,index,hands,bets,1)
             else:
                 hardaction(hand,dealerupcard,deck,bet)
     else:
@@ -201,7 +201,7 @@ def play(no_of_hands,deck):
     #playeraction
     ind = 0
     while ind < len(hands):
-        action(hands[ind], dealer[0], deck, bets[ind],ind,hands,bets)
+        action(hands[ind], dealer[0], deck, bets[ind],ind,hands,bets,0)
         ind += 1
 
     #dealeraction
@@ -272,9 +272,9 @@ def adjustbet(deck):
     global standardbet
     truecount = math.floor(globalcount*52/len(deck))
     if truecount >= 3:
-        standardbet = 30
+        standardbet = 200
     elif truecount >= 1 and truecount <3:
-        standardbet = 15
+        standardbet = 20
     elif truecount <0:
         standardbet = 5
     else:
@@ -284,18 +284,20 @@ def adjustbet(deck):
 
 def main():
     global standardbet
-    rounds = 10000
+    rounds = 500000
+    totalbet = 0
     profit = 0
-    no_of_hands = 3
+    no_of_hands = 1
     max = 0
     min = 0
     deck = newdeck()
     for i in range(rounds):
-        if i%500 == 0:
+        if i%50000 == 0:
             print(i,'rounds played, profit:', profit)
-        if len(deck) < 30:
+        if len(deck) < 160:
             deck = newdeck()
         adjustbet(deck)
+        totalbet += (no_of_hands*standardbet)
         #print('round',i,'current card count is',globalcount,'bet is',standardbet)
         roundprofit = play(no_of_hands,deck)
         #print('round',i,'profit:',roundprofit)
@@ -307,6 +309,7 @@ def main():
     print("final profit is ", profit)
     print("max profit is ", max)
     print("min profit is ", min)
+    print("percentage is",profit*100/totalbet,'%')
 
 
 main()
